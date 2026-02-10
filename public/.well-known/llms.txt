@@ -1,0 +1,15 @@
+# [Project Name]
+High-level summary of the site's purpose.
+
+## Core Terminology
+- **Entity A**: [Definition]
+- **Flow B**: [Definition]
+
+## Key Resources
+- [Main Documentation](/docs)
+- [API Reference](/api-docs)
+- [Pricing & Terms](/pricing)
+
+## Capabilities
+- Can execute [Action X] via the `/agents.json` endpoint.
+- Provides real-time data for [Category Y].

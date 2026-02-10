@@ -1,0 +1,14 @@
+{
+  "schema_version": "0.1.0",
+  "agent_card": {
+    "name": "SiteName-Orchestrator",
+    "capabilities": [
+      "data-retrieval",
+      "form-automation"
+    ],
+    "endpoints": {
+      "discovery": "/.well-known/ai-instructions.json",
+      "action_root": "/api/v1/agent-actions"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "agent-aware-starter",
+  "version": "1.0.0",
+  "description": "Starter for Agent-Aware Architecture",
+  "main": "middleware/agent-handler.js",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
