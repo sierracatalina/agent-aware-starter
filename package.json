@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Starter for Agent-Aware Architecture",
   "main": "middleware/agent-handler.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "echo 'No build required'"
+  },
   "dependencies": {
     "express": "^4.18.2"
   }
