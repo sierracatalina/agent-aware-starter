@@ -1,0 +1,235 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:aaa:schema:config:1.0-draft",
+  "title": "Agent-Aware Starter Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "site",
+    "agent",
+    "discovery",
+    "context_layer",
+    "protocols",
+    "actions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "aaa/1.0-draft"
+    },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "origin", "description"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^urn:aaa:site:" },
+        "name": { "type": "string", "minLength": 1 },
+        "origin": { "type": "string", "format": "uri", "pattern": "^https?://" },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "version", "recipient"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^urn:aaa:agent:" },
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$" },
+        "recipient": { "type": "string", "minLength": 1 }
+      }
+    },
+    "discovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cache_seconds", "resources", "terminology", "advisory_hints"],
+      "properties": {
+        "cache_seconds": { "type": "integer", "minimum": 0, "maximum": 86400 },
+        "resources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["title", "path", "description"],
+            "properties": {
+              "title": { "type": "string", "minLength": 1 },
+              "path": { "type": "string", "pattern": "^/" },
+              "description": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "terminology": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        },
+        "advisory_hints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "description"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+              "description": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "context_layer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "status", "conformance", "max_bundle_lifetime_seconds", "receipt_issuer"],
+      "properties": {
+        "version": { "const": "context-layer/0.1-draft" },
+        "status": { "const": "consumer-candidate" },
+        "conformance": { "const": "not-claimed" },
+        "max_bundle_lifetime_seconds": { "type": "integer", "minimum": 1, "maximum": 86400 },
+        "receipt_issuer": { "type": "string", "pattern": "^urn:cl:receipt-writer:" }
+      }
+    },
+    "protocols": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mcp", "a2a"],
+      "properties": {
+        "mcp": { "$ref": "#/definitions/protocol" },
+        "a2a": { "$ref": "#/definitions/protocol" }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/action" }
+    }
+  },
+  "definitions": {
+    "protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "endpoint": { "type": "string", "format": "uri-reference" },
+        "interface": { "type": "string", "format": "uri" }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "description", "auth", "side_effect", "human_confirmation", "input_schema", "output_schema", "context"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9]*)+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "auth": { "enum": ["anonymous", "required"] },
+        "side_effect": { "enum": ["none", "reversible", "irreversible"] },
+        "human_confirmation": { "enum": ["never", "required"] },
+        "input_schema": {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": { "const": "object" }
+          }
+        },
+        "output_schema": {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": { "const": "object" }
+          }
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required", "selectors", "purposes", "max_retention_seconds", "receipt_required"],
+          "properties": {
+            "required": { "type": "boolean" },
+            "selectors": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$" }
+            },
+            "purposes": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "max_retention_seconds": { "type": "integer", "minimum": 0, "maximum": 86400 },
+            "receipt_required": { "type": "boolean" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "context": {
+                "type": "object",
+                "properties": {
+                  "required": { "const": true }
+                }
+              }
+            }
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "auth": { "const": "required" },
+              "context": {
+                "type": "object",
+                "properties": {
+                  "selectors": { "type": "array", "minItems": 1 },
+                  "purposes": { "type": "array", "minItems": 1, "maxItems": 1 },
+                  "max_retention_seconds": { "type": "integer", "minimum": 1 },
+                  "receipt_required": { "const": true }
+                }
+              }
+            }
+          },
+          "else": {
+            "type": "object",
+            "properties": {
+              "side_effect": { "const": "none" },
+              "human_confirmation": { "const": "never" },
+              "context": {
+                "type": "object",
+                "properties": {
+                  "selectors": { "type": "array", "maxItems": 0 },
+                  "purposes": { "type": "array", "maxItems": 0 },
+                  "max_retention_seconds": { "const": 0 },
+                  "receipt_required": { "const": false }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "side_effect": { "enum": ["reversible", "irreversible"] }
+            }
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "auth": { "const": "required" },
+              "human_confirmation": { "const": "required" },
+              "context": {
+                "type": "object",
+                "properties": {
+                  "required": { "const": true },
+                  "receipt_required": { "const": true }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

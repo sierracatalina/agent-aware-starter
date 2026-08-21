@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aaa:schema:context-layer:memory-update-proposal:0.1-draft",
+  "title": "memory update proposal",
+  "description": "A pending candidate memory change that has not been committed as durable context.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "spec_version",
+    "type",
+    "id",
+    "created_at",
+    "issuer",
+    "subject_ref",
+    "operation",
+    "proposed_claims",
+    "provenance_refs",
+    "rationale",
+    "submitted_by",
+    "status",
+    "approval_requirement"
+  ],
+  "properties": {
+    "spec_version": {
+      "const": "context-layer/0.1-draft"
+    },
+    "type": {
+      "const": "memory_update_proposal"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^urn:cl:proposal:[A-Za-z0-9._~-]+$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issuer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 512
+        }
+      }
+    },
+    "subject_ref": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 512
+    },
+    "operation": {
+      "$ref": "#/$defs/name"
+    },
+    "proposed_claims": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "predicate",
+          "object",
+          "confidence"
+        ],
+        "properties": {
+          "predicate": {
+            "$ref": "#/$defs/name"
+          },
+          "object": true,
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "provenance_refs": {
+      "type": "array",
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 512
+      }
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "submitted_by": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 512
+    },
+    "status": {
+      "const": "pending_validation"
+    },
+    "approval_requirement": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/name"
+      }
+    }
+  },
+  "$defs": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$"
+    }
+  }
+}

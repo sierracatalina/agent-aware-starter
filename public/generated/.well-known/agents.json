@@ -1,0 +1,16 @@
+{
+  "$schema": "https://agents-txt.com/schema/agents-json/v1.0.json",
+  "version": "1.0",
+  "standard": "https://agents-txt.com",
+  "site": {
+    "name": "Agent-Aware Starter",
+    "url": "https://sierracatalina.com",
+    "description": "Reference starter for explicit, reviewable agent discovery and guarded actions."
+  },
+  "authorization": {
+    "protocols": [
+      "x-context-layer"
+    ],
+    "discovery": "/.well-known/context-layer"
+  }
+}

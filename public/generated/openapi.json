@@ -1,0 +1,274 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Agent-Aware Starter Agent Actions",
+    "version": "1.0.0",
+    "description": "Guarded action API. Discovery metadata never grants authority to execute an action."
+  },
+  "servers": [
+    {
+      "url": "https://sierracatalina.com"
+    }
+  ],
+  "paths": {
+    "/api/v1/agent-actions": {
+      "get": {
+        "operationId": "listAgentActions",
+        "summary": "List configured public action metadata",
+        "responses": {
+          "200": {
+            "description": "Configured action catalog.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "actions"
+                  ],
+                  "properties": {
+                    "actions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ActionMetadata"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/agent-actions/{actionId}": {
+      "post": {
+        "operationId": "executeAgentAction",
+        "summary": "Execute one allowlisted agent action",
+        "description": "The server independently enforces configured identity, context, purpose, selector, retention, confirmation, idempotency, and receipt requirements. Requirements vary by actionId as declared in x-agent-aware-action-policies.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {}
+        ],
+        "x-agent-aware-action-policies": {
+          "context.inspect": {
+            "authentication": "required",
+            "context_required": true,
+            "context_layer_version_required": true,
+            "idempotency_key_required": false,
+            "side_effect": "none",
+            "human_confirmation": "never",
+            "receipt_required": true
+          },
+          "site.status": {
+            "authentication": "anonymous",
+            "context_required": false,
+            "context_layer_version_required": false,
+            "idempotency_key_required": false,
+            "side_effect": "none",
+            "human_confirmation": "never",
+            "receipt_required": false
+          }
+        },
+        "parameters": [
+          {
+            "name": "actionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "context.inspect",
+                "site.status"
+              ]
+            }
+          },
+          {
+            "name": "Context-Layer-Version",
+            "in": "header",
+            "required": false,
+            "description": "Required with value 0.1-draft for actions whose policy declares context_layer_version_required.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "0.1-draft"
+              ]
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Required for every action whose policy declares idempotency_key_required.",
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 200,
+              "pattern": "^[A-Za-z0-9._~:+/-]+$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActionRequest"
+              }
+            },
+            "application/vnd.context-layer+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Action completed and all required receipts were persisted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or required protocol header."
+          },
+          "401": {
+            "description": "Identity is required or invalid."
+          },
+          "403": {
+            "description": "The requested action is not authorized."
+          },
+          "409": {
+            "description": "Replay, idempotency, or state conflict."
+          },
+          "410": {
+            "description": "The context bundle expired or was revoked."
+          },
+          "422": {
+            "description": "The request violates the action or Context Layer contract."
+          },
+          "503": {
+            "description": "A required identity, verification, receipt, or idempotency control is unavailable."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Required only for actions whose published policy declares authentication required."
+      }
+    },
+    "schemas": {
+      "ActionMetadata": {
+        "type": "object",
+        "required": [
+          "id",
+          "description",
+          "auth",
+          "context",
+          "side_effect"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "context.inspect",
+              "site.status"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "auth": {
+            "type": "string",
+            "enum": [
+              "anonymous",
+              "required"
+            ]
+          },
+          "context": {
+            "type": "object"
+          },
+          "side_effect": {
+            "type": "string"
+          },
+          "human_confirmation": {
+            "type": "string",
+            "enum": [
+              "never",
+              "required"
+            ]
+          }
+        }
+      },
+      "ActionRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "input": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "context_bundle": {
+            "type": "object",
+            "description": "A scoped bundle supplied only when required by the configured action."
+          }
+        }
+      },
+      "ActionResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version",
+          "type",
+          "request_id",
+          "action",
+          "status",
+          "result",
+          "receipts"
+        ],
+        "properties": {
+          "schema_version": {
+            "const": "aaa/1.0-draft"
+          },
+          "type": {
+            "const": "action_result"
+          },
+          "request_id": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "context.inspect",
+              "site.status"
+            ]
+          },
+          "status": {
+            "const": "completed"
+          },
+          "result": {
+            "type": "object"
+          },
+          "receipts": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^urn:cl:receipt:[A-Za-z0-9._~-]+$"
+            }
+          }
+        }
+      }
+    }
+  }
+}

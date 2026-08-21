@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /llms.txt
+Allow: /agents.txt
+Allow: /agents.json
+Allow: /agent-manifest.json
+Allow: /.well-known/context-layer
+Allow: /context-layer-conformance.json
+Allow: /

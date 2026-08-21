@@ -1,14 +1,25 @@
 {
   "name": "agent-aware-starter",
   "version": "1.0.0",
-  "description": "Starter for Agent-Aware Architecture",
-  "main": "middleware/agent-handler.js",
+  "description": "Agent-aware discovery and guarded action gateway for context-routed applications",
+  "main": "src/index.js",
+  "packageManager": "pnpm@11.19.0",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "build": "echo 'No build required'"
+    "build": "node scripts/build-discovery.js",
+    "check": "node scripts/check.js",
+    "test": "node --test",
+    "verify": "node scripts/build-discovery.js && node scripts/check.js && node --test"
   },
   "dependencies": {
-    "express": "^4.18.2"
-  }
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "express": "5.2.1"
+  },
+  "license": "UNLICENSED"
 }

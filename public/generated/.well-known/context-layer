@@ -1,0 +1,63 @@
+{
+  "spec_version": "context-layer/0.1-draft",
+  "type": "capability_document",
+  "id": "urn:aaa:site:agent-aware-starter:context-layer",
+  "issuer": {
+    "id": "urn:aaa:agent:site-orchestrator"
+  },
+  "status": "experimental",
+  "implementation_status": "consumer-candidate",
+  "conformance": "not-claimed",
+  "versions_supported": [
+    "context-layer/0.1-draft"
+  ],
+  "roles": {
+    "claimed": [],
+    "candidate": [
+      "CL-Core-Consumer"
+    ]
+  },
+  "object_types": {
+    "accepts": [
+      "scoped_context_bundle"
+    ],
+    "emits": [
+      "receipt",
+      "memory_update_proposal"
+    ]
+  },
+  "authentication": {
+    "protected_actions": "deployment-specific",
+    "development_profile": "static-bearer-and-explicit-unsigned-issuer-allowlist"
+  },
+  "extensions": {
+    "supported": [],
+    "required": []
+  },
+  "receipt_capabilities": {
+    "operations": [
+      "bundle.consume",
+      "declared-action"
+    ],
+    "payload_included": false,
+    "durable_store": "deployment-specific",
+    "single_use_reservation": true
+  },
+  "http_profile": {
+    "version_header": "Context-Layer-Version",
+    "accepted_version": "0.1-draft",
+    "media_types": [
+      "application/json",
+      "application/vnd.context-layer+json"
+    ],
+    "experimental_media_type": "application/vnd.context-layer+json"
+  },
+  "max_bundle_lifetime_seconds": 300,
+  "endpoints": {
+    "action_catalog": "/api/v1/agent-actions",
+    "action_execution_template": "/api/v1/agent-actions/{actionId}",
+    "manifest": "/agent-manifest.json"
+  },
+  "conformance_report": "/context-layer-conformance.json",
+  "notice": "This endpoint is an experimental integration declaration. Context Layer conformance is not claimed."
+}

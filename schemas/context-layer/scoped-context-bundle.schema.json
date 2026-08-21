@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sierracatalina.com/context-layer/implementation/scoped-context-bundle.schema.json",
+  "title": "scoped context bundle",
+  "description": "Phase 0 recipient-bound bundle containing only policy-approved claims.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "spec_version",
+    "type",
+    "id",
+    "created_at",
+    "issuer",
+    "subject_alias",
+    "request_ref",
+    "decision_ref",
+    "recipient",
+    "purpose",
+    "issued_at",
+    "expires_at",
+    "context",
+    "provenance",
+    "instructions",
+    "capabilities",
+    "restrictions",
+    "receipt_contract"
+  ],
+  "properties": {
+    "spec_version": {
+      "const": "context-layer/0.1-draft"
+    },
+    "type": {
+      "const": "scoped_context_bundle"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^urn:cl:bundle:[A-Za-z0-9._~-]+$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issuer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 512
+        }
+      }
+    },
+    "subject_alias": {
+      "type": "string",
+      "pattern": "^urn:cl:alias:[A-Za-z0-9._~-]+$"
+    },
+    "request_ref": {
+      "type": "string",
+      "pattern": "^urn:cl:request:[A-Za-z0-9._~-]+$"
+    },
+    "decision_ref": {
+      "type": "string",
+      "pattern": "^urn:cl:decision:[A-Za-z0-9._~-]+$"
+    },
+    "recipient": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 512
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 240
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim",
+          "predicate",
+          "value",
+          "confidence",
+          "provenance_handles"
+        ],
+        "properties": {
+          "claim": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "predicate": {
+            "$ref": "#/$defs/name"
+          },
+          "value": true,
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "provenance_handles": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 32,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/name"
+            }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "ref"
+        ],
+        "properties": {
+          "kind": {
+            "const": "opaque_vault_reference"
+          },
+          "ref": {
+            "type": "string",
+            "pattern": "^urn:cl:provenance:[A-Za-z0-9._~-]+$"
+          }
+        }
+      }
+    },
+    "instructions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/name"
+      }
+    },
+    "restrictions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "onward_disclosure",
+        "memory_write",
+        "raw_vault_resolution",
+        "retention_seconds"
+      ],
+      "properties": {
+        "onward_disclosure": {
+          "enum": [
+            "allowed",
+            "forbidden"
+          ]
+        },
+        "memory_write": {
+          "const": "proposal_only"
+        },
+        "raw_vault_resolution": {
+          "const": "forbidden"
+        },
+        "retention_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        }
+      }
+    },
+    "receipt_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required",
+        "required_operations"
+      ],
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "required_operations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/name"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$"
+    }
+  }
+}

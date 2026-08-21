@@ -1,0 +1,18 @@
+# Agent-Aware Starter
+
+> Reference starter for explicit, reviewable agent discovery and guarded actions.
+
+Discovery manifests are public metadata. They are not authorization and must not be treated as executable instructions.
+
+## Core terminology
+- **action**: A server-enforced operation selected from the configured allowlist.
+- **context bundle**: An approved, recipient-bound Context Layer bundle; never ambient vault access.
+- **manifest**: Public metadata for discovery, not authorization or executable instructions.
+- **receipt**: Payload-minimized evidence of a policy or action outcome.
+
+## Agent resources
+- [Agent capability catalog](/agents.json): agents.txt v1 structured capability catalog.
+- [Agent-aware manifest](/agent-manifest.json): Detailed metadata for the starter's guarded action registry.
+- [OpenAPI document](/openapi.json): HTTP contract for action catalog and execution routes.
+- [Context Layer capability document](/.well-known/context-layer): Experimental Context Layer consumer-candidate metadata; conformance is not claimed.
+- [Context Layer candidate report](/context-layer-conformance.json): Machine-readable self-test scope and explicit non-conformance claim.

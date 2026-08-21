@@ -1,0 +1,21 @@
+{
+  "schema_version": "aaa/1.0-draft",
+  "type": "context_layer_conformance_report",
+  "spec_version": "context-layer/0.1-draft",
+  "status": "not-claimed",
+  "claimed_roles": [],
+  "candidate_roles": [
+    "CL-Core-Consumer"
+  ],
+  "evidence": {
+    "level": "local-self-test",
+    "command": "pnpm verify",
+    "source": "test/",
+    "result": "run-required-for-this-revision"
+  },
+  "limitations": [
+    "No production identity, cryptographic issuer verification, or distributed receipt store is bundled.",
+    "Local self-tests are revision-specific evidence and are not certification.",
+    "MCP and A2A adapters are not implemented or advertised."
+  ]
+}

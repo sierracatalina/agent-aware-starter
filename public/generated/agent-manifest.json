@@ -1,0 +1,99 @@
+{
+  "schema_version": "aaa/1.0-draft",
+  "type": "agent_manifest",
+  "site": {
+    "id": "urn:aaa:site:agent-aware-starter",
+    "name": "Agent-Aware Starter",
+    "origin": "https://sierracatalina.com",
+    "description": "Reference starter for explicit, reviewable agent discovery and guarded actions."
+  },
+  "agent": {
+    "id": "urn:aaa:agent:site-orchestrator",
+    "name": "Site Orchestrator",
+    "version": "1.0.0",
+    "recipient": "urn:aaa:recipient:site-orchestrator"
+  },
+  "notice": "This public manifest is metadata, not authorization or executable instructions.",
+  "discovery": {
+    "llms": "/llms.txt",
+    "agents": "/agents.json",
+    "hints": "/agent-hints.json",
+    "context_layer": "/.well-known/context-layer",
+    "openapi": "/openapi.json"
+  },
+  "context_layer": {
+    "spec_version": "context-layer/0.1-draft",
+    "status": "consumer-candidate",
+    "conformance": "not-claimed",
+    "max_bundle_lifetime_seconds": 300
+  },
+  "protocols": [],
+  "actions": [
+    {
+      "id": "context.inspect",
+      "name": "Inspect approved context",
+      "description": "Inspect the approved project summary from a valid, recipient-bound context bundle.",
+      "auth": "required",
+      "side_effect": "none",
+      "human_confirmation": "never",
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "context": {
+        "required": true,
+        "selectors": [
+          "project.summary"
+        ],
+        "purposes": [
+          "inspect approved project context"
+        ],
+        "max_retention_seconds": 300,
+        "receipt_required": true
+      },
+      "catalog": {
+        "method": "GET",
+        "path": "/api/v1/agent-actions"
+      },
+      "execution": {
+        "method": "POST",
+        "path": "/api/v1/agent-actions/context.inspect"
+      }
+    },
+    {
+      "id": "site.status",
+      "name": "Site status",
+      "description": "Return public runtime status without reading private context.",
+      "auth": "anonymous",
+      "side_effect": "none",
+      "human_confirmation": "never",
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "context": {
+        "required": false,
+        "selectors": [],
+        "purposes": [],
+        "max_retention_seconds": 0,
+        "receipt_required": false
+      },
+      "catalog": {
+        "method": "GET",
+        "path": "/api/v1/agent-actions"
+      },
+      "execution": {
+        "method": "POST",
+        "path": "/api/v1/agent-actions/site.status"
+      }
+    }
+  ]
+}

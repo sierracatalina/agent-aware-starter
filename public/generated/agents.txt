@@ -1,0 +1,5 @@
+# agents.txt
+# Standard: https://agents-txt.com
+# JSON: https://sierracatalina.com/agents.json
+
+Authorization: x-context-layer
