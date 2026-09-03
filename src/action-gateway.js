@@ -91,6 +91,7 @@ function createActionGateway(options) {
         });
       }
       assertNoSecretFields(input, 'action input');
+      const actionInputDigest = digestValue({ action: action.id, input });
 
       let identity = {
         principal: 'untrusted_anonymous',
@@ -279,7 +280,7 @@ function createActionGateway(options) {
             startedAt,
             completedAt: now(),
             policySnapshotDigest: verification.policySnapshotDigest,
-            input: { action: action.id, request_id: request.id },
+            inputDigest: actionInputDigest,
             output: { completed: false, indeterminate: effectMayHaveOccurred },
             userSummary: effectMayHaveOccurred
               ? 'The ' + action.id + ' action outcome is indeterminate; payload omitted.'
@@ -316,7 +317,7 @@ function createActionGateway(options) {
           startedAt,
           completedAt: now(),
           policySnapshotDigest: verification.policySnapshotDigest,
-          input: { action: action.id, request_id: request.id },
+          inputDigest: actionInputDigest,
           output: result,
           userSummary: 'Completed ' + action.id + '; payload omitted.',
         });

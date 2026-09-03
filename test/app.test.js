@@ -8,6 +8,7 @@ const {
   createActionGateway,
   createApp,
   createDevelopmentBundleVerifier,
+  digestValue,
   loadConfig,
 } = require('../src');
 const validBundle = require('./fixtures/context-layer/valid-bundle.json');
@@ -291,6 +292,74 @@ test('executes a bound protected action with a narrowed handler view and durable
   assert.equal(replay.status, 409);
   assert.equal((await replay.json()).code, 'BUNDLE_REPLAYED');
   assert.equal(receiptStore.list().length, 2);
+});
+
+test('binds success and failure receipts to validated action input without storing plaintext', async (t) => {
+  const config = testConfig();
+  const action = config.actions.find((entry) => entry.id === 'context.inspect');
+  action.input_schema = {
+    type: 'object',
+    additionalProperties: false,
+    required: ['memo'],
+    properties: {
+      memo: { type: 'string', minLength: 1 },
+    },
+  };
+
+  const receiptStore = new InMemoryReceiptStore();
+  const successInput = { memo: 'receipt-input-success-marker' };
+  const failureInput = { memo: 'receipt-input-failure-marker' };
+  const { baseUrl } = await start(t, {
+    config,
+    authenticator,
+    verifyBundle: async () => verified(),
+    receiptStore,
+    handlers: {
+      'context.inspect': async ({ input }) => {
+        if (input.memo === failureInput.memo) throw new Error('synthetic action failure');
+        return { accepted: true };
+      },
+    },
+  });
+
+  const success = await postAction(
+    baseUrl,
+    'context.inspect',
+    {
+      input: successInput,
+      context_bundle: bundleFor(config, { id: 'urn:cl:bundle:input-digest-success' }),
+    },
+    { 'context-layer-version': '0.1-draft' },
+  );
+  assert.equal(success.status, 200);
+
+  const failure = await postAction(
+    baseUrl,
+    'context.inspect',
+    {
+      input: failureInput,
+      context_bundle: bundleFor(config, { id: 'urn:cl:bundle:input-digest-failure' }),
+    },
+    { 'context-layer-version': '0.1-draft' },
+  );
+  assert.equal(failure.status, 500);
+
+  const actionReceipts = receiptStore.list()
+    .filter((receipt) => receipt.operation === 'context.inspect');
+  assert.equal(actionReceipts.length, 2);
+  assert.equal(
+    actionReceipts[0].input_digest,
+    digestValue({ action: 'context.inspect', input: successInput }),
+  );
+  assert.equal(
+    actionReceipts[1].input_digest,
+    digestValue({ action: 'context.inspect', input: failureInput }),
+  );
+  assert.notEqual(actionReceipts[0].input_digest, actionReceipts[1].input_digest);
+
+  const serializedReceipts = JSON.stringify(receiptStore.list());
+  assert.equal(serializedReceipts.includes(successInput.memo), false);
+  assert.equal(serializedReceipts.includes(failureInput.memo), false);
 });
 
 test('rejects verifier output that does not attest caller binding', async (t) => {
