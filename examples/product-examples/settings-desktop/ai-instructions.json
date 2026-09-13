@@ -1,0 +1,84 @@
+{
+  "protocol": "AAA/0.1",
+  "version": "1.0",
+  "status": "example",
+  "live": false,
+  "http_action_api": "none",
+  "notes": "Settings-desktop fixture. action_root is the string none. Illustrative anchors only.",
+  "priority_selectors": {
+    "primary_action": "[data-agent-action='primary']",
+    "navigation": "[data-agent-nav='settings-tabs']"
+  },
+  "interaction_rules": {
+    "max_retries": 0,
+    "wait_for_selector_timeout": 2000,
+    "ignore_elements": [
+      "[data-agent-untrusted]",
+      ".user-generated-content"
+    ],
+    "deep_link_pattern": "app://settings?id=<anchor>"
+  },
+  "settings_anchors": [
+    {
+      "id": "privacy",
+      "title": "Privacy",
+      "deep_link": "app://settings?id=privacy"
+    },
+    {
+      "id": "models",
+      "title": "Models",
+      "deep_link": "app://settings?id=models"
+    },
+    {
+      "id": "connectors",
+      "title": "Connectors",
+      "deep_link": "app://settings?id=connectors"
+    },
+    {
+      "id": "appearance",
+      "title": "Appearance",
+      "deep_link": "app://settings?id=appearance"
+    },
+    {
+      "id": "about",
+      "title": "About",
+      "deep_link": "app://settings?id=about"
+    }
+  ],
+  "settings_actions": [
+    {
+      "id": "privacy",
+      "href": "app://settings?id=privacy",
+      "data_agent_action": "settings.privacy"
+    },
+    {
+      "id": "models",
+      "href": "app://settings?id=models",
+      "data_agent_action": "settings.models"
+    },
+    {
+      "id": "connectors",
+      "href": "app://settings?id=connectors",
+      "data_agent_action": "settings.connectors"
+    },
+    {
+      "id": "appearance",
+      "href": "app://settings?id=appearance",
+      "data_agent_action": "settings.appearance"
+    },
+    {
+      "id": "about",
+      "href": "app://settings?id=about",
+      "data_agent_action": "settings.about"
+    }
+  ],
+  "safety": {
+    "prohibit_direct_input_to": [
+      "[data-agent-secret]"
+    ],
+    "require_human_confirmation_for": [
+      "settings.privacy",
+      "settings.connectors"
+    ]
+  }
+}

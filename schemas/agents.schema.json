@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://protocol.aaa.example/schemas/agents.schema.json",
+  "title": "AAA agents.json",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "agent_card"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "live": {
+      "type": "boolean"
+    },
+    "http_action_api": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "service_name": {
+      "type": "string"
+    },
+    "endpoints": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "agent_card": {
+      "type": "object",
+      "required": [
+        "name",
+        "capabilities",
+        "endpoints"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "endpoints": {
+          "type": "object",
+          "required": [
+            "discovery",
+            "action_root"
+          ],
+          "properties": {
+            "discovery": {
+              "type": "string"
+            },
+            "action_root": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "const": "none"
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
