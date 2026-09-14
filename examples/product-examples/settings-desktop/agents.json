@@ -1,0 +1,18 @@
+{
+  "schema_version": "0.1.0",
+  "status": "example",
+  "live": false,
+  "http_action_api": "none",
+  "notes": "Settings-desktop fixture. action_root is the string none.",
+  "agent_card": {
+    "name": "Settings Desktop Example",
+    "capabilities": [
+      "settings-discovery",
+      "ui-intent-markup"
+    ],
+    "endpoints": {
+      "discovery": "/.well-known/ai-instructions.json",
+      "action_root": "none"
+    }
+  }
+}

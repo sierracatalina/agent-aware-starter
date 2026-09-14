@@ -1,0 +1,43 @@
+{
+  "protocol": "AAA/0.1",
+  "version": "0.1.0",
+  "status": "example",
+  "live": false,
+  "last_updated": "2026-09-13",
+  "policy": {
+    "allow_autonomous_execution": true,
+    "require_human_approval_for": [
+      "payments",
+      "code_deployment",
+      "data_deletion"
+    ],
+    "rate_limit": "60 requests/minute"
+  },
+  "discovery": {
+    "actions": "/.well-known/agents.json",
+    "context": "/.well-known/llms.txt"
+  },
+  "priority_selectors": {
+    "primary_action": "[data-agent-action='primary']",
+    "navigation": "nav[role='navigation']"
+  },
+  "interaction_rules": {
+    "max_retries": 3,
+    "wait_for_selector_timeout": 5000,
+    "ignore_elements": [
+      ".ad-slot",
+      ".user-generated-content",
+      "[data-agent-untrusted]"
+    ]
+  },
+  "safety": {
+    "prohibit_direct_input_to": [
+      "#credit-card-field"
+    ],
+    "require_human_confirmation_for": [
+      "/api/delete",
+      "/api/transfer",
+      "payments"
+    ]
+  }
+}

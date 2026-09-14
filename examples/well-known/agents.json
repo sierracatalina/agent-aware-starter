@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.1.0",
+  "status": "example",
+  "live": false,
+  "agent_card": {
+    "name": "Example-Site-Orchestrator",
+    "capabilities": [
+      "data-retrieval",
+      "form-automation"
+    ],
+    "endpoints": {
+      "discovery": "/.well-known/ai-instructions.json",
+      "action_root": "/api/v1/agent-actions"
+    }
+  },
+  "endpoints": [
+    {
+      "name": "get_status",
+      "description": "Returns service health.",
+      "path": "/api/v1/status",
+      "method": "GET",
+      "risk_level": "low"
+    },
+    {
+      "name": "submit_task",
+      "description": "Queues an asynchronous task.",
+      "path": "/api/v1/agent/task",
+      "method": "POST",
+      "risk_level": "medium",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description"
+        ]
+      }
+    }
+  ]
+}

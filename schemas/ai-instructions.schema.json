@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "aaa/0.1/ai-instructions.schema.json",
+  "title": "AAA ai-instructions.json",
+  "$comment": "Pack-local schema id; examples are fixtures with live:false.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["version"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "live": {
+      "type": "boolean"
+    },
+    "priority_selectors": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "interaction_rules": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wait_for_selector_timeout": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ignore_elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "prohibit_direct_input_to": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "require_human_confirmation_for": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "settings_anchors": {
+      "type": "array",
+      "description": "Documented deep-link ids for settings-desktop. Agents MUST NOT invent anchors.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "deep_link": {
+            "type": "string",
+            "pattern": "^app://settings\\?id=[a-z][a-z0-9-]*$"
+          }
+        }
+      }
+    }
+  }
+}
