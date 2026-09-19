@@ -1,82 +1,247 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "aaa/0.1/ai-instructions.schema.json",
+  "$id": "urn:aaa:schema:ai-instructions:0.1.1",
   "title": "AAA ai-instructions.json",
-  "$comment": "Pack-local schema id; examples are fixtures with live:false.",
   "type": "object",
-  "additionalProperties": true,
-  "required": ["version"],
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "version",
+    "profile",
+    "status",
+    "live",
+    "http_action_api",
+    "policy",
+    "discovery",
+    "interaction_rules",
+    "safety"
+  ],
   "properties": {
+    "protocol": {
+      "const": "AAA/0.1"
+    },
     "version": {
-      "type": "string",
-      "minLength": 1
+      "const": "0.1.1"
+    },
+    "profile": {
+      "enum": ["site", "settings"]
+    },
+    "status": {
+      "enum": ["example", "draft", "active", "deprecated"]
     },
     "live": {
       "type": "boolean"
     },
+    "http_action_api": {
+      "enum": ["none", "declared"]
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allow_autonomous_execution", "require_human_approval_for"],
+      "properties": {
+        "allow_autonomous_execution": {
+          "type": "boolean",
+          "description": "When false, every declared action requires exact-invocation human confirmation after independent authentication and authorization."
+        },
+        "require_human_approval_for": {
+          "$ref": "#/$defs/actionIds"
+        },
+        "rate_limit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    },
+    "discovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actions", "context"],
+      "properties": {
+        "actions": { "$ref": "#/$defs/pathOrHttpsUrl" },
+        "context": { "$ref": "#/$defs/pathOrHttpsUrl" }
+      }
+    },
     "priority_selectors": {
       "type": "object",
+      "maxProperties": 100,
       "additionalProperties": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
       }
     },
     "interaction_rules": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
+      "required": ["max_retries", "wait_for_selector_timeout", "ignore_elements"],
       "properties": {
         "max_retries": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "maximum": 10
         },
         "wait_for_selector_timeout": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "maximum": 120000
         },
         "ignore_elements": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "$ref": "#/$defs/selectors"
+        },
+        "deep_link_pattern": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9+.-]*://.+<anchor>.*$",
+          "maxLength": 2048
         }
       }
     },
     "safety": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
+      "required": ["prohibit_direct_input_to", "require_human_confirmation_for"],
       "properties": {
         "prohibit_direct_input_to": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "$ref": "#/$defs/selectors"
         },
         "require_human_confirmation_for": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "$ref": "#/$defs/actionIds"
         }
       }
     },
     "settings_anchors": {
       "type": "array",
-      "description": "Documented deep-link ids for settings-desktop. Agents MUST NOT invent anchors.",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["id"],
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/settingsAnchor" }
+    },
+    "settings_actions": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/settingsAction" }
+    },
+    "out_of_settings_actions": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/outOfSettingsAction" }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "profile": { "const": "settings" } },
+        "required": ["profile"]
+      },
+      "then": {
         "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9-]*$"
-          },
-          "title": {
-            "type": "string"
-          },
-          "deep_link": {
-            "type": "string",
-            "pattern": "^app://settings\\?id=[a-z][a-z0-9-]*$"
-          }
+          "http_action_api": { "const": "none" }
+        },
+        "required": ["settings_anchors", "settings_actions"]
+      },
+      "else": {
+        "properties": {
+          "http_action_api": { "const": "declared" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "pathOrHttpsUrl": {
+      "type": "string",
+      "maxLength": 2048,
+      "anyOf": [
+        { "pattern": "^/(?!/)(?!.*\\.\\.)(?!.*#)[^\\s]*$" },
+        { "pattern": "^https://(?![^/]*@)[^\\s#]+$" }
+      ]
+    },
+    "selectors": {
+      "type": "array",
+      "maxItems": 100,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      }
+    },
+    "actionIds": {
+      "type": "array",
+      "maxItems": 100,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      }
+    },
+    "settingsAnchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "deep_link"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "deep_link": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9+.-]*://",
+          "maxLength": 2048
+        }
+      }
+    },
+    "settingsAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "href", "data_agent_action", "requires_human_confirmation"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "href": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9+.-]*://",
+          "maxLength": 2048
+        },
+        "data_agent_action": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$"
+        },
+        "requires_human_confirmation": {
+          "type": "boolean"
+        }
+      }
+    },
+    "outOfSettingsAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "how_to", "requires_human_confirmation"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$"
+        },
+        "how_to": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "requires_human_confirmation": {
+          "const": true
         }
       }
     }

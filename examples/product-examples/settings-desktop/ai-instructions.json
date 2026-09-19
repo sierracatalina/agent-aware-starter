@@ -1,9 +1,18 @@
 {
   "protocol": "AAA/0.1",
-  "version": "1.0",
+  "version": "0.1.1",
+  "profile": "settings",
   "status": "example",
   "live": false,
   "http_action_api": "none",
+  "policy": {
+    "allow_autonomous_execution": false,
+    "require_human_approval_for": []
+  },
+  "discovery": {
+    "actions": "/.well-known/agents.json",
+    "context": "/.well-known/llms.txt"
+  },
   "notes": "Settings-desktop fixture. action_root is the string none. Illustrative anchors only.",
   "priority_selectors": {
     "primary_action": "[data-agent-action='primary']",
@@ -49,36 +58,38 @@
     {
       "id": "privacy",
       "href": "app://settings?id=privacy",
-      "data_agent_action": "settings.privacy"
+      "data_agent_action": "settings.privacy",
+      "requires_human_confirmation": false
     },
     {
       "id": "models",
       "href": "app://settings?id=models",
-      "data_agent_action": "settings.models"
+      "data_agent_action": "settings.models",
+      "requires_human_confirmation": false
     },
     {
       "id": "connectors",
       "href": "app://settings?id=connectors",
-      "data_agent_action": "settings.connectors"
+      "data_agent_action": "settings.connectors",
+      "requires_human_confirmation": false
     },
     {
       "id": "appearance",
       "href": "app://settings?id=appearance",
-      "data_agent_action": "settings.appearance"
+      "data_agent_action": "settings.appearance",
+      "requires_human_confirmation": false
     },
     {
       "id": "about",
       "href": "app://settings?id=about",
-      "data_agent_action": "settings.about"
+      "data_agent_action": "settings.about",
+      "requires_human_confirmation": false
     }
   ],
   "safety": {
     "prohibit_direct_input_to": [
       "[data-agent-secret]"
     ],
-    "require_human_confirmation_for": [
-      "settings.privacy",
-      "settings.connectors"
-    ]
+    "require_human_confirmation_for": []
   }
 }

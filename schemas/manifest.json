@@ -1,0 +1,9 @@
+{
+  "protocol": "AAA/0.1",
+  "document_profile": "0.1.1",
+  "hash_algorithm": "sha256",
+  "schemas": {
+    "agents.schema.json": "8140e3c7097ba87c1bae9cd0e98b60537b3362df0fcf1bec941db26f9a2f3664",
+    "ai-instructions.schema.json": "896c16b8c8f5cb7ad4aa29342dbc41945f17ef079190771e38b2793d4b933b9c"
+  }
+}

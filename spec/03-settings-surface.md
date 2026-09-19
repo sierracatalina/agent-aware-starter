@@ -7,6 +7,8 @@ Some agent products have **no public HTTP action API**. For those, AAA's Setting
 3. Deep links use a documented pattern only — never invented paths
 4. Optional markup: `data-agent-action`, `data-agent-href`, `data-agent-requires`, `data-agent-nav`, `data-agent-untrusted`
 
+`settings_actions` in the discovery document name navigation targets. Their `requires_human_confirmation` flag governs opening that destination. It does not approve changes made inside Settings. Every Settings mutation requires a separate human confirmation tied to the exact proposed change, with short expiry and single-use semantics supplied by the host. AAA has no HTTP action grant for the Settings profile.
+
 ## Deep links
 
 Products MAY publish a deep-link pattern in `interaction_rules.deep_link_pattern`.

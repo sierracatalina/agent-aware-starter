@@ -2,7 +2,7 @@
 
 **Protocol:** Agent Aware Architecture (AAA)  
 **Profile:** Settings / site handshake  
-**Version target:** `AAA/0.1`
+**Version target:** `AAA/0.1`, document profile `0.1.1`
 
 AAA specifies how an agent discovers explicit intent from a well-known file set and, for a Settings surface, opens a documented destination instead of inventing an HTTP action API.
 
@@ -12,6 +12,8 @@ AAA specifies how an agent discovers explicit intent from a well-known file set 
 2. **Settings profile uses `action_root: "none"`.** A Settings surface MUST NOT expose a public HTTP action API through AAA.
 3. **No scraped authority.** A button label is not an AAA action. If it is not on the map, it is out of band.
 4. **Fixtures use `live: false`.** Examples in this repository are not a published origin.
+5. **Declared actions have one meaning.** Action IDs are unique, and HTTP endpoints stay under the declared `action_root`.
+6. **Independent authority is required.** AAA maps an action; the host runtime authenticates the actor, validates a grant, and approves the exact invocation and any private-context egress.
 
 ## In this tree
 
