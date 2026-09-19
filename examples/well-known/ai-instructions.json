@@ -1,15 +1,15 @@
 {
   "protocol": "AAA/0.1",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "profile": "site",
   "status": "example",
   "live": false,
+  "http_action_api": "declared",
   "last_updated": "2026-09-13",
   "policy": {
     "allow_autonomous_execution": true,
     "require_human_approval_for": [
-      "payments",
-      "code_deployment",
-      "data_deletion"
+      "submit_task"
     ],
     "rate_limit": "60 requests/minute"
   },
@@ -34,10 +34,6 @@
     "prohibit_direct_input_to": [
       "#credit-card-field"
     ],
-    "require_human_confirmation_for": [
-      "/api/delete",
-      "/api/transfer",
-      "payments"
-    ]
+    "require_human_confirmation_for": ["submit_task"]
   }
 }

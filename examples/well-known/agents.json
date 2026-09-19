@@ -1,7 +1,8 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.1.1",
   "status": "example",
   "live": false,
+  "http_action_api": "declared",
   "agent_card": {
     "name": "Example-Site-Orchestrator",
     "capabilities": [
@@ -17,14 +18,14 @@
     {
       "name": "get_status",
       "description": "Returns service health.",
-      "path": "/api/v1/status",
+      "path": "/api/v1/agent-actions/status",
       "method": "GET",
       "risk_level": "low"
     },
     {
       "name": "submit_task",
       "description": "Queues an asynchronous task.",
-      "path": "/api/v1/agent/task",
+      "path": "/api/v1/agent-actions/task",
       "method": "POST",
       "risk_level": "medium",
       "parameters": {

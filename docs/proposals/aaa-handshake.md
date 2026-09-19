@@ -30,9 +30,9 @@ The Express demo in this repository is historical only. It is not required to im
 
 ```text
 surface encountered
-  -> GET /.well-known/llms.txt
-  -> GET /.well-known/agents.json
   -> GET /.well-known/ai-instructions.json
+  -> GET its declared agents.json discovery pointer
+  -> GET its optional llms.txt context pointer
   -> if action_root is HTTP:
         call only mapped actions; honor safety lists
      if action_root is the string "none":
