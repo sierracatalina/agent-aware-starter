@@ -2,17 +2,71 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "aaa/0.1/ai-instructions.schema.json",
   "title": "AAA ai-instructions.json",
-  "$comment": "Pack-local schema id; examples are fixtures with live:false.",
+  "$comment": "Pack-local schema id; examples are fixtures with live:false. Strict since task-4: additionalProperties is false at every object level; vendor-specific extras belong in a single 'extensions' object.",
   "type": "object",
-  "additionalProperties": true,
-  "required": ["version"],
+  "additionalProperties": false,
+  "required": [
+    "version"
+  ],
   "properties": {
     "version": {
       "type": "string",
       "minLength": 1
     },
+    "protocol": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
     "live": {
       "type": "boolean"
+    },
+    "last_updated": {
+      "type": "string"
+    },
+    "http_action_api": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allow_autonomous_execution": {
+          "type": "boolean",
+          "description": "Advisory only. AAA never grants authority (spec 00, invariant 1: handshake, not authority)."
+        },
+        "require_human_approval_for": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rate_limit": {
+          "type": "string"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "discovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "type": "string"
+        },
+        "context": {
+          "type": "string"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
     },
     "priority_selectors": {
       "type": "object",
@@ -22,7 +76,7 @@
     },
     "interaction_rules": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "max_retries": {
           "type": "integer",
@@ -37,12 +91,19 @@
           "items": {
             "type": "string"
           }
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "deep_link_pattern": {
+          "type": "string",
+          "description": "Template for settings deep links, e.g. app://settings?id=<anchor>."
         }
       }
     },
     "safety": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "prohibit_direct_input_to": {
           "type": "array",
@@ -55,6 +116,35 @@
           "items": {
             "type": "string"
           }
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "settings_actions": {
+      "type": "array",
+      "description": "Documented settings-destination actions for the settings profile.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "href": {
+            "type": "string"
+          },
+          "data_agent_action": {
+            "type": "string"
+          },
+          "extensions": {
+            "type": "object"
+          }
         }
       }
     },
@@ -64,7 +154,9 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -76,9 +168,15 @@
           "deep_link": {
             "type": "string",
             "pattern": "^app://settings\\?id=[a-z][a-z0-9-]*$"
+          },
+          "extensions": {
+            "type": "object"
           }
         }
       }
+    },
+    "extensions": {
+      "type": "object"
     }
   }
 }
