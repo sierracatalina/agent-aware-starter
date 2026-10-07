@@ -148,6 +148,35 @@
         }
       }
     },
+    "out_of_settings_actions": {
+      "type": "array",
+      "description": "Documented out-of-Settings actions with how-to strings and confirmation flags (spec 03). Descriptive metadata only; AAA never grants authority.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "how_to",
+          "requires_human_confirmation"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "how_to": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requires_human_confirmation": {
+            "type": "boolean"
+          },
+          "extensions": {
+            "type": "object"
+          }
+        }
+      }
+    },
     "settings_anchors": {
       "type": "array",
       "description": "Documented deep-link ids for settings-desktop. Agents MUST NOT invent anchors.",

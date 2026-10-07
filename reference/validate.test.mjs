@@ -148,3 +148,116 @@ test("non-JSON input is a usage error", () => {
   const r = run([p, "--kind=agents"]);
   assert.equal(r.code, 2);
 });
+
+test("out_of_settings_actions accepts documented how-to and confirmation metadata", () => {
+  const d = JSON.parse(readFileSync(join(HERE, "..", "examples", "product-examples", "settings-desktop", "ai-instructions.json"), "utf8"));
+  d.out_of_settings_actions = [{
+    id: "delete-project",
+    how_to: "Open the project menu, choose Delete, and confirm in the UI.",
+    requires_human_confirmation: true,
+    extensions: { "x-vendor": "example" },
+  }];
+  const r = run(doc("out-of-settings.json", d, "ai-instructions"));
+  assert.equal(r.code, 0, r.stdout + r.stderr);
+  assert.match(r.stdout, /^VALID/);
+});
+
+test("out_of_settings_actions enforces its shape and rejects undeclared item fields", () => {
+  const action = {
+    id: "delete-project",
+    how_to: "Use the project menu and confirm in the UI.",
+    requires_human_confirmation: true,
+  };
+  const cases = [
+    ["array", action],
+    ["object", ["delete-project"]],
+    ["id", [{ ...action, id: "" }]],
+    ["how_to", [{ ...action, how_to: 42 }]],
+    ["requires_human_confirmation", [{ ...action, requires_human_confirmation: "true" }]],
+    ["endpoint", [{ ...action, endpoint: "/api/delete" }]],
+  ];
+  for (const field of Object.keys(action)) {
+    const incomplete = { ...action };
+    delete incomplete[field];
+    cases.push([field, [incomplete]]);
+  }
+  for (const [expected, value] of cases) {
+    const d = { version: "1.0", out_of_settings_actions: value };
+    const r = run(doc("bad-out-of-settings.json", d, "ai-instructions"));
+    assert.equal(r.code, 1, JSON.stringify(value));
+    assert.match(r.stdout, /^INVALID/);
+    assert.ok(r.stdout.includes(expected), r.stdout);
+  }
+});
+
+test("prototype property names cannot bypass strict objects in either schema", () => {
+  for (const [kind, base, nested] of [
+    ["agents", baseAgents, "agent_card"],
+    ["ai-instructions", baseAi, "policy"],
+  ]) {
+    for (const key of ["constructor", "toString", "__proto__"]) {
+      for (const location of [null, nested]) {
+        const d = clone(base);
+        // JSON parsing creates an own __proto__ property, unlike an object literal.
+        Object.defineProperty(location ? d[location] : d, key, {
+          value: JSON.parse('{"unexpected": true}'), enumerable: true,
+        });
+        const r = run(doc("prototype-key.json", d, kind));
+        assert.equal(r.code, 1, `${kind} ${location || "$"}.${key}: ${r.stdout}`);
+        assert.ok(r.stdout.includes(`additional property '${key}'`), r.stdout);
+      }
+    }
+  }
+});
+
+test("prototype property names retain extension and typed-map semantics", () => {
+  const d = clone(baseAi);
+  d.extensions = JSON.parse('{"constructor": 1, "toString": {}, "__proto__": []}');
+  d.priority_selectors = JSON.parse('{"constructor": "#one", "toString": "#two", "__proto__": "#three"}');
+  const valid = run(doc("prototype-map.json", d, "ai-instructions"));
+  assert.equal(valid.code, 0, valid.stdout + valid.stderr);
+  for (const key of Object.keys(d.priority_selectors)) {
+    const invalid = clone(d);
+    invalid.priority_selectors[key] = 42;
+    const r = run(doc("bad-prototype-map.json", invalid, "ai-instructions"));
+    assert.equal(r.code, 1, key);
+    assert.ok(r.stdout.includes(`$.priority_selectors.${key}: expected string`), r.stdout);
+  }
+});
+
+test("both --kind forms work before and after the file and override detection", () => {
+  for (const [kind, base, otherKind] of [
+    ["agents", baseAgents, "ai-instructions"],
+    ["ai-instructions", baseAi, "agents"],
+  ]) {
+    for (const [name, value, expectedCode] of [
+      [`${otherKind}-override.json`, base, 0],
+      ["ambiguous.json", {}, 1],
+    ]) {
+      const [file] = doc(name, value, kind);
+      for (const args of [
+        [file, "--kind", kind], ["--kind", kind, file],
+        [file, `--kind=${kind}`], [`--kind=${kind}`, file],
+      ]) {
+        const r = run(args);
+        assert.equal(r.code, expectedCode, `${args}: ${r.stdout} ${r.stderr}`);
+        assert.ok(r.stdout.includes(`(kind: ${kind})`), r.stdout);
+      }
+    }
+  }
+});
+
+test("missing or invalid --kind values are usage errors even for detectable files", () => {
+  const file = join(HERE, "..", "examples", "well-known", "agents.json");
+  for (const args of [
+    [file, "--kind"], [file, "--kind", "--kind=agents"],
+    [file, "--kind="], [file, "--kind", ""],
+    [file, "--kind", "unknown"], [file, "--kind=unknown"],
+    [file, "--kind", "constructor"], [file, "--kind=__proto__"],
+    ["--kind", "agents"], ["--kind=agents"],
+  ]) {
+    const r = run(args);
+    assert.equal(r.code, 2, `${args}: ${r.stdout} ${r.stderr}`);
+    assert.doesNotMatch(r.stderr, /cannot load schema/);
+  }
+});

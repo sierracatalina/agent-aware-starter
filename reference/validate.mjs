@@ -111,7 +111,7 @@ function validate(schema, instance, path, errors) {
     }
     const props = schema.properties || {};
     for (const [k, v] of Object.entries(instance)) {
-      if (k in props) {
+      if (Object.hasOwn(props, k)) {
         validate(props[k], v, `${at}.${k}`, errors);
       } else if (schema.additionalProperties === false) {
         errors.push(`${at}: additional property '${k}' is not allowed (use 'extensions' for extras)`);
@@ -146,8 +146,22 @@ function detectKind(doc, filename) {
 
 function main(argv) {
   const args = argv.slice(2);
-  const file = args.find((a) => !a.startsWith("--"));
-  const kindFlag = args.find((a) => a.startsWith("--kind="));
+  let file;
+  let kindFlag;
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === "--kind") {
+      if (args[i + 1] === undefined || args[i + 1].startsWith("--")) {
+        process.stderr.write(usage() + "\n");
+        return 2;
+      }
+      kindFlag = args[++i];
+    } else if (arg.startsWith("--kind=")) {
+      kindFlag = arg.slice("--kind=".length);
+    } else if (!arg.startsWith("--") && file === undefined) {
+      file = arg;
+    }
+  }
   if (!file) {
     process.stderr.write(usage() + "\n");
     return 2;
@@ -164,8 +178,8 @@ function main(argv) {
     return 2;
   }
 
-  let kind = kindFlag ? kindFlag.slice("--kind=".length) : detectKind(doc, file);
-  if (!kind || !(kind in SCHEMAS)) {
+  const kind = kindFlag ?? detectKind(doc, file);
+  if (!kind || !Object.hasOwn(SCHEMAS, kind)) {
     process.stderr.write(
       `error: cannot determine schema kind for ${file}; pass --kind=agents or --kind=ai-instructions\n`,
     );
