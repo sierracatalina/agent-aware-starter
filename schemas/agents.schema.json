@@ -1,80 +1,141 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Strict since task-4: additionalProperties is false at every object level; vendor-specific extras belong in a single 'extensions' object.",
   "$id": "https://protocol.aaa.example/schemas/agents.schema.json",
-  "title": "AAA agents.json",
-  "type": "object",
-  "additionalProperties": true,
-  "required": [
-    "schema_version",
-    "agent_card"
-  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
   "properties": {
-    "schema_version": {
-      "type": "string"
-    },
-    "status": {
-      "type": "string"
-    },
-    "live": {
-      "type": "boolean"
-    },
-    "http_action_api": {
-      "type": "string"
-    },
-    "notes": {
-      "type": "string"
-    },
-    "service_name": {
-      "type": "string"
-    },
-    "endpoints": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      }
-    },
     "agent_card": {
-      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "capabilities": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "endpoints": {
+          "additionalProperties": false,
+          "properties": {
+            "action_root": {
+              "anyOf": [
+                {
+                  "const": "none",
+                  "type": "string"
+                },
+                {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              ],
+              "$comment": "Was oneOf; 'none' matched both branches so the settings profile value required by spec 00 invariant 2 could never validate. anyOf keeps the intent."
+            },
+            "discovery": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "extensions": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "discovery",
+            "action_root"
+          ],
+          "type": "object"
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
       "required": [
         "name",
         "capabilities",
         "endpoints"
       ],
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "capabilities": {
-          "type": "array",
-          "items": {
+      "type": "object"
+    },
+    "endpoints": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "extensions": {
+            "type": "object"
+          },
+          "method": {
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE",
+              "HEAD",
+              "OPTIONS"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "risk_level": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
             "type": "string"
           }
         },
-        "endpoints": {
-          "type": "object",
-          "required": [
-            "discovery",
-            "action_root"
-          ],
-          "properties": {
-            "discovery": {
-              "type": "string"
-            },
-            "action_root": {
-              "oneOf": [
-                {
-                  "type": "string",
-                  "const": "none"
-                },
-                {
-                  "type": "string",
-                  "minLength": 1
-                }
-              ]
-            }
-          }
-        }
-      }
+        "required": [
+          "name",
+          "path",
+          "method"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "extensions": {
+      "type": "object"
+    },
+    "http_action_api": {
+      "type": "string"
+    },
+    "live": {
+      "type": "boolean"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "schema_version": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "service_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
     }
-  }
+  },
+  "required": [
+    "schema_version",
+    "agent_card"
+  ],
+  "title": "AAA agents.json",
+  "type": "object"
 }
