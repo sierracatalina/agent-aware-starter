@@ -1,0 +1,40 @@
+name: Validate AAA
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run reference tests
+        run: node --test reference/
+      - name: Validate every JSON example
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            node reference/validate.mjs "$file"
+          done < <(find examples -type f -name '*.json' -print0)
+
+  live-smoke:
+    # External availability is recorded separately from deterministic validation.
+    # Inspect this job's result; a network outage does not invalidate fixtures.
+    continue-on-error: true
+    timeout-minutes: 2
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Read the public Auny origin with the pinned reader
+        run: node reference/read.mjs https://aunysillyme.com --json

@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "aaa/0.1/ai-instructions.schema.json",
+  "title": "AAA ai-instructions.json",
+  "$comment": "Pack-local schema id; examples are fixtures with live:false. Strict since task-4: additionalProperties is false at every object level; vendor-specific extras belong in a single 'extensions' object.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "protocol": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "live": {
+      "type": "boolean"
+    },
+    "last_updated": {
+      "type": "string"
+    },
+    "http_action_api": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allow_autonomous_execution": {
+          "type": "boolean",
+          "description": "Advisory only. AAA never grants authority (spec 00, invariant 1: handshake, not authority)."
+        },
+        "require_human_approval_for": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rate_limit": {
+          "type": "string"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "discovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "type": "string"
+        },
+        "context": {
+          "type": "string"
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "priority_selectors": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "interaction_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wait_for_selector_timeout": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ignore_elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "extensions": {
+          "type": "object"
+        },
+        "deep_link_pattern": {
+          "type": "string",
+          "description": "Template for settings deep links, e.g. app://settings?id=<anchor>."
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prohibit_direct_input_to": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "require_human_confirmation_for": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "extensions": {
+          "type": "object"
+        }
+      }
+    },
+    "settings_actions": {
+      "type": "array",
+      "description": "Documented settings-destination actions for the settings profile.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "href": {
+            "type": "string"
+          },
+          "data_agent_action": {
+            "type": "string"
+          },
+          "extensions": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "out_of_settings_actions": {
+      "type": "array",
+      "description": "Documented out-of-Settings actions with how-to strings and confirmation flags (spec 03). Descriptive metadata only; AAA never grants authority.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "how_to",
+          "requires_human_confirmation"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "how_to": {
+            "type": "string",
+            "minLength": 1
+          },
+          "requires_human_confirmation": {
+            "type": "boolean"
+          },
+          "extensions": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "settings_anchors": {
+      "type": "array",
+      "description": "Documented deep-link ids for settings-desktop. Agents MUST NOT invent anchors.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "deep_link": {
+            "type": "string",
+            "pattern": "^app://settings\\?id=[a-z][a-z0-9-]*$"
+          },
+          "extensions": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "extensions": {
+      "type": "object"
+    }
+  }
+}

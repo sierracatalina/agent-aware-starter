@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * AAA reference validator (task-4).
+ * AAA reference validator (AAA/0.2, backward-compatible with AAA/0.1).
  *
  * Validates an agents.json or ai-instructions.json document against the
  * tightened schemas in ../schemas/. Dependency-free: implements the JSON
  * Schema subset the AAA schemas use (type, required, properties,
- * additionalProperties, items, enum, const, anyOf/oneOf, minLength,
- * minimum, pattern).
+ * additionalProperties, patternProperties, items, enum, const, anyOf/oneOf,
+ * minLength, minimum, pattern, and the uri-reference format).
  *
  * Advisory rule (not a validity error): if
  * `policy.allow_autonomous_execution` is `true`, emit an ADVISORY warning.
@@ -18,9 +18,10 @@
  *
  * Exit codes: 0 = valid (advisories allowed), 1 = invalid, 2 = usage/IO error.
  */
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, realpathSync } from "node:fs";
 import { dirname, join, basename } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isIP } from "node:net";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SCHEMAS = {
@@ -85,6 +86,9 @@ function validate(schema, instance, path, errors) {
       }
       if (!re.test(instance)) errors.push(`${at}: does not match pattern ${schema.pattern}`);
     }
+    if (schema.format === "uri-reference" && !isURIReference(instance)) {
+      errors.push(`${at}: expected a valid uri-reference`);
+    }
   }
   if (typeof instance === "number" && schema.minimum !== undefined && instance < schema.minimum) {
     errors.push(`${at}: ${instance} is less than minimum ${schema.minimum}`);
@@ -110,10 +114,23 @@ function validate(schema, instance, path, errors) {
       if (!(req in instance)) errors.push(`${at}: missing required property '${req}'`);
     }
     const props = schema.properties || {};
+    const patterns = Object.entries(schema.patternProperties || {}).map(([pattern, sub]) => [
+      new RegExp(pattern), sub,
+    ]);
     for (const [k, v] of Object.entries(instance)) {
+      let matched = false;
       if (Object.hasOwn(props, k)) {
         validate(props[k], v, `${at}.${k}`, errors);
-      } else if (schema.additionalProperties === false) {
+        matched = true;
+      }
+      for (const [pattern, sub] of patterns) {
+        if (pattern.test(k)) {
+          validate(sub, v, `${at}.${k}`, errors);
+          matched = true;
+        }
+      }
+      if (matched) continue;
+      if (schema.additionalProperties === false) {
         errors.push(`${at}: additional property '${k}' is not allowed (use 'extensions' for extras)`);
       } else if (isPlainObject(schema.additionalProperties)) {
         validate(schema.additionalProperties, v, `${at}.${k}`, errors);
@@ -124,6 +141,39 @@ function validate(schema, instance, path, errors) {
   if (Array.isArray(instance) && schema.items) {
     instance.forEach((item, i) => validate(schema.items, item, `${at}[${i}]`, errors));
   }
+}
+
+/** RFC 3986 URI-reference grammar; unlike URL(), this does not repair input. */
+function isURIReference(value) {
+  // URI-reference is ASCII, with percent-encoding for other characters.
+  if (/[^\x21-\x7e]/.test(value)) return false;
+  const match = /^(?:([A-Za-z][A-Za-z0-9+.-]*):)?([^?#]*)(?:\?([^#]*))?(?:#(.*))?$/.exec(value);
+  if (!match) return false;
+  const [, scheme, hierarchy, query, fragment] = match;
+  const atom = "(?:[A-Za-z0-9._~!$&'()*+,;=:@-]|%[0-9A-Fa-f]{2})";
+  const pathPattern = new RegExp(`^(?:${atom}|/)*$`);
+  const queryPattern = new RegExp(`^(?:${atom}|[/?])*$`);
+  if (query !== undefined && !queryPattern.test(query)) return false;
+  if (fragment !== undefined && !queryPattern.test(fragment)) return false;
+  if (!hierarchy.startsWith("//")) {
+    if (!pathPattern.test(hierarchy)) return false;
+    // A relative path's first segment cannot contain a colon.
+    return Boolean(scheme) || hierarchy.startsWith("/") || !hierarchy.split("/")[0].includes(":");
+  }
+  const slash = hierarchy.indexOf("/", 2);
+  const authority = slash < 0 ? hierarchy.slice(2) : hierarchy.slice(2, slash);
+  const path = slash < 0 ? "" : hierarchy.slice(slash);
+  if (!pathPattern.test(path)) return false;
+  const unreserved = "(?:[A-Za-z0-9._~!$&'()*+,;=-]|%[0-9A-Fa-f]{2})";
+  const authorityPattern = new RegExp(
+    `^(?:(?:${unreserved}|:)*@)?(\\[[^\\]]*\\]|${unreserved}*)(?::[0-9]*)?$`,
+  );
+  const parts = authorityPattern.exec(authority);
+  if (!parts) return false;
+  if (!parts[1].startsWith("[")) return true;
+  const literal = parts[1].slice(1, -1);
+  return (isIP(literal) === 6 && !literal.includes("%")) ||
+    /^v[0-9A-Fa-f]+\.[A-Za-z0-9._~!$&'()*+,;=:-]+$/i.test(literal);
 }
 
 function isPlainObject(x) {
@@ -142,6 +192,20 @@ function detectKind(doc, filename) {
   if (isPlainObject(doc) && "agent_card" in doc) return "agents";
   if (isPlainObject(doc) && "version" in doc) return "ai-instructions";
   return null;
+}
+
+/** Validate with the same strict schema engine as the CLI; importing has no side effects. */
+export function validateDocument(doc, kind) {
+  if (!Object.hasOwn(SCHEMAS, kind)) throw new TypeError(`Unknown schema kind: ${kind}`);
+  const schema = JSON.parse(readFileSync(SCHEMAS[kind], "utf8"));
+  const errors = [];
+  validate(schema, doc, "$", errors);
+  const warnings = [];
+  if (kind === "ai-instructions" && isPlainObject(doc) &&
+      isPlainObject(doc.policy) && doc.policy.allow_autonomous_execution === true) {
+    warnings.push(ADVISORY_TEXT);
+  }
+  return { valid: errors.length === 0, errors, warnings };
 }
 
 function main(argv) {
@@ -186,16 +250,15 @@ function main(argv) {
     return 2;
   }
 
-  let schema;
+  let result;
   try {
-    schema = JSON.parse(readFileSync(SCHEMAS[kind], "utf8"));
+    result = validateDocument(doc, kind);
   } catch (e) {
     process.stderr.write(`error: cannot load schema: ${e.message}\n`);
     return 2;
   }
 
-  const errors = [];
-  validate(schema, doc, "$", errors);
+  const { errors, warnings } = result;
   if (errors.length > 0) {
     process.stdout.write(`INVALID ${file} (kind: ${kind})\n`);
     for (const e of errors) process.stdout.write(`  - ${e}\n`);
@@ -204,15 +267,14 @@ function main(argv) {
 
   process.stdout.write(`VALID ${file} (kind: ${kind})\n`);
 
-  // Advisory-only rule: AAA never grants authority.
-  if (
-    kind === "ai-instructions" &&
-    isPlainObject(doc.policy) &&
-    doc.policy.allow_autonomous_execution === true
-  ) {
-    process.stdout.write(ADVISORY_TEXT + "\n");
-  }
+  for (const warning of warnings) process.stdout.write(warning + "\n");
   return 0;
 }
 
-process.exit(main(process.argv));
+let isDirectEntry = false;
+try {
+  isDirectEntry = Boolean(process.argv[1]) && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
+} catch {
+  // An importer may have a non-file argv[1], for example `node -e ... label`.
+}
+if (isDirectEntry) process.exitCode = main(process.argv);

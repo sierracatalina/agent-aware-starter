@@ -1,6 +1,6 @@
 # Agent-Aware Architecture handshake
 
-**Protocol:** AAA/0.1  
+**Protocol:** AAA/0.2
 **License:** MIT Copyright (c) 2026 Sierra Catalina
 
 AAA defines a machine-readable handshake so agents can discover explicit intent, safety rails, and Settings destinations without scraping a DOM.
@@ -30,9 +30,9 @@ The Express demo in this repository is historical only. It is not required to im
 
 ```text
 surface encountered
-  -> GET /.well-known/llms.txt
-  -> GET /.well-known/agents.json
   -> GET /.well-known/ai-instructions.json
+  -> GET discovery.actions (usually /.well-known/agents.json)
+  -> GET discovery.context (usually /.well-known/llms.txt)
   -> if action_root is HTTP:
         call only mapped actions; honor safety lists
      if action_root is the string "none":

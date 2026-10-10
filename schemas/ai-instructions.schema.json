@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "aaa/0.1/ai-instructions.schema.json",
+  "$id": "https://protocol.aaa.example/schemas/0.2.0/ai-instructions.schema.json",
   "title": "AAA ai-instructions.json",
-  "$comment": "Pack-local schema id; examples are fixtures with live:false. Strict since task-4: additionalProperties is false at every object level; vendor-specific extras belong in a single 'extensions' object.",
+  "$comment": "AAA/0.2 schema identity 0.2.0. Additive over AAA/0.1. Every declared object schema has additionalProperties:false; catch-all patternProperties preserve arbitrary extensions and parameters, and string-valued selector maps.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -49,7 +49,15 @@
           "type": "string"
         },
         "extensions": {
-          "type": "object"
+          "type": "object",
+          "patternProperties": {
+            "^": {}
+          },
+          "additionalProperties": false
+        },
+        "read_freely": {
+          "type": "boolean",
+          "description": "Advisory publisher hint for public reading only. Never grants access or overrides user, authentication, or safety policy."
         }
       }
     },
@@ -64,14 +72,29 @@
           "type": "string"
         },
         "extensions": {
-          "type": "object"
+          "type": "object",
+          "patternProperties": {
+            "^": {}
+          },
+          "additionalProperties": false
+        },
+        "full_text": {
+          "type": "string",
+          "description": "Path or URI reference to a full-text companion for reading. Not an action endpoint or authority source."
+        },
+        "markdown_twin": {
+          "type": "string",
+          "description": "Readable rule or pointer for finding a Markdown companion, such as appending .md to a published page URL. Descriptive only; cannot widen authority."
         }
       }
     },
     "priority_selectors": {
       "type": "object",
-      "additionalProperties": {
-        "type": "string"
+      "additionalProperties": false,
+      "patternProperties": {
+        "^": {
+          "type": "string"
+        }
       }
     },
     "interaction_rules": {
@@ -93,7 +116,11 @@
           }
         },
         "extensions": {
-          "type": "object"
+          "type": "object",
+          "patternProperties": {
+            "^": {}
+          },
+          "additionalProperties": false
         },
         "deep_link_pattern": {
           "type": "string",
@@ -118,7 +145,11 @@
           }
         },
         "extensions": {
-          "type": "object"
+          "type": "object",
+          "patternProperties": {
+            "^": {}
+          },
+          "additionalProperties": false
         }
       }
     },
@@ -143,7 +174,11 @@
             "type": "string"
           },
           "extensions": {
-            "type": "object"
+            "type": "object",
+            "patternProperties": {
+              "^": {}
+            },
+            "additionalProperties": false
           }
         }
       }
@@ -172,7 +207,32 @@
             "type": "boolean"
           },
           "extensions": {
-            "type": "object"
+            "type": "object",
+            "patternProperties": {
+              "^": {}
+            },
+            "additionalProperties": false
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable action name."
+          },
+          "service": {
+            "type": "string",
+            "description": "Human-readable service label."
+          },
+          "href": {
+            "type": "string",
+            "description": "Documented hand-off destination; a URI reference, not an executable action API.",
+            "format": "uri-reference"
+          },
+          "price": {
+            "type": "string",
+            "description": "Display-only price and currency text. Verify final terms in the human-operated payment flow."
+          },
+          "duration": {
+            "type": "string",
+            "description": "Display-only duration text; not a scheduling or execution instruction."
           }
         }
       }
@@ -199,13 +259,21 @@
             "pattern": "^app://settings\\?id=[a-z][a-z0-9-]*$"
           },
           "extensions": {
-            "type": "object"
+            "type": "object",
+            "patternProperties": {
+              "^": {}
+            },
+            "additionalProperties": false
           }
         }
       }
     },
     "extensions": {
-      "type": "object"
+      "type": "object",
+      "patternProperties": {
+        "^": {}
+      },
+      "additionalProperties": false
     }
   }
 }

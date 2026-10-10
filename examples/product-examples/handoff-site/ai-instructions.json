@@ -1,0 +1,67 @@
+{
+  "version": "0.2.0",
+  "protocol": "AAA/0.2",
+  "status": "example",
+  "live": false,
+  "last_updated": "2026-10-10",
+  "http_action_api": "none",
+  "notes": "Fictional service catalog. Prices and durations are illustrative display text. Human handles payment; no action is authorized by this document.",
+  "policy": {
+    "read_freely": true,
+    "allow_autonomous_execution": false,
+    "require_human_approval_for": [
+      "booking",
+      "payments"
+    ]
+  },
+  "discovery": {
+    "actions": "/.well-known/agents.json",
+    "context": "/.well-known/llms.txt",
+    "full_text": "/.well-known/llms.txt",
+    "markdown_twin": "/.well-known/llms.txt"
+  },
+  "priority_selectors": {
+    "services": "[data-agent-nav='services']",
+    "offerings": "[data-agent-action='view-service']"
+  },
+  "interaction_rules": {
+    "max_retries": 0,
+    "ignore_elements": [
+      "[data-agent-untrusted]",
+      ".customer-reviews"
+    ]
+  },
+  "safety": {
+    "prohibit_direct_input_to": [
+      "[data-payment-field]",
+      "input[autocomplete='cc-number']"
+    ],
+    "require_human_confirmation_for": [
+      "book-design-review",
+      "book-brand-session",
+      "payments"
+    ]
+  },
+  "out_of_settings_actions": [
+    {
+      "id": "book-design-review",
+      "name": "Book a design review",
+      "service": "Design review",
+      "href": "/services/design-review",
+      "price": "USD 80",
+      "duration": "45 minutes",
+      "how_to": "Open the documented design-review page when authorized. Let the human verify availability and total price, enter payment details, accept terms, and submit the purchase.",
+      "requires_human_confirmation": true
+    },
+    {
+      "id": "book-brand-session",
+      "name": "Book a brand session",
+      "service": "Brand planning session",
+      "href": "/services/brand-session",
+      "price": "USD 140",
+      "duration": "90 minutes",
+      "how_to": "Open the documented brand-session page when authorized. Hand control to the human before booking or payment; the human confirms the final terms and completes checkout.",
+      "requires_human_confirmation": true
+    }
+  ]
+}

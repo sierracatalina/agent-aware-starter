@@ -36,3 +36,18 @@ Example anchors in this pack: `privacy`, `models`, `connectors`, `appearance`, `
 Destructive or structural actions that are **not** Settings rows MUST be listed under `out_of_settings_actions` with how-to strings and confirmation flags — still not as invented HTTP endpoints.
 
 See [`../examples/product-examples/settings-desktop/`](../examples/product-examples/settings-desktop/).
+
+## Hand-off profile
+
+A service site can publish a catalog of purchasable actions without exposing a public HTTP action API. This **hand-off profile** uses the same discovery files and the string `none` for `agent_card.endpoints.action_root`.
+
+- List offerings in `out_of_settings_actions`, with the existing required `id`, `how_to`, and `requires_human_confirmation` fields.
+- Every item MUST set `requires_human_confirmation: true`. This profile requirement does not narrow the general schema's existing boolean field.
+- Purchasable offerings SHOULD include a readable `name` or `service` label, `price`, `duration`, and a documented `href`. Prices and durations are display text, not commitments or verified availability.
+- The agent may describe offerings and, when already authorized, open a published destination. A link is a hand-off destination, not an HTTP action endpoint; never infer POST routes or checkout APIs from it.
+- The human MUST handle payment, including entering payment details, accepting payment terms, and submitting the purchase. The agent MUST stop for the human before payment. Publisher hints such as `read_freely` or `allow_autonomous_execution` cannot change this boundary.
+- Reading is still governed by user and consumer policy. Confirmation metadata can tighten that policy, never expand authority.
+
+Use `discovery.full_text` for a full reading companion, `discovery.markdown_twin` for readable rules, and `interaction_rules.ignore_elements` for untrusted content regions. Do not introduce top-level `actions`, `safety.untrusted_regions`, or `how` aliases.
+
+See the fictional [hand-off service-site fixture](../examples/product-examples/handoff-site/) for AAA/0.2 catalog metadata and human-only checkout. Like every example in this repository, it is `live: false`.

@@ -1,0 +1,21 @@
+{
+  "schema_version": "0.2.0",
+  "protocol": "AAA/0.2",
+  "status": "example",
+  "live": false,
+  "last_updated": "2026-10-10",
+  "service_name": "Aster Studio",
+  "http_action_api": "none",
+  "notes": "Fictional Auny-shaped service-site fixture. Published destinations lead to human-operated checkout; no public action API or live service is claimed.",
+  "agent_card": {
+    "name": "Aster Studio Hand-off Catalog",
+    "capabilities": [
+      "service-discovery",
+      "human-checkout-handoff"
+    ],
+    "endpoints": {
+      "discovery": "/.well-known/ai-instructions.json",
+      "action_root": "none"
+    }
+  }
+}

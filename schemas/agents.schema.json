@@ -1,6 +1,6 @@
 {
-  "$comment": "Strict since task-4: additionalProperties is false at every object level; vendor-specific extras belong in a single 'extensions' object.",
-  "$id": "https://protocol.aaa.example/schemas/agents.schema.json",
+  "$comment": "AAA/0.2 schema identity 0.2.0. Additive over AAA/0.1. Every declared object schema has additionalProperties:false; catch-all patternProperties preserve arbitrary extensions and parameters, and string-valued selector maps.",
+  "$id": "https://protocol.aaa.example/schemas/0.2.0/agents.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
@@ -34,7 +34,11 @@
               "type": "string"
             },
             "extensions": {
-              "type": "object"
+              "type": "object",
+              "patternProperties": {
+                "^": {}
+              },
+              "additionalProperties": false
             }
           },
           "required": [
@@ -44,7 +48,11 @@
           "type": "object"
         },
         "extensions": {
-          "type": "object"
+          "type": "object",
+          "patternProperties": {
+            "^": {}
+          },
+          "additionalProperties": false
         },
         "name": {
           "minLength": 1,
@@ -66,7 +74,11 @@
             "type": "string"
           },
           "extensions": {
-            "type": "object"
+            "type": "object",
+            "patternProperties": {
+              "^": {}
+            },
+            "additionalProperties": false
           },
           "method": {
             "enum": [
@@ -85,7 +97,11 @@
             "type": "string"
           },
           "parameters": {
-            "type": "object"
+            "type": "object",
+            "patternProperties": {
+              "^": {}
+            },
+            "additionalProperties": false
           },
           "path": {
             "minLength": 1,
@@ -110,7 +126,11 @@
       "type": "array"
     },
     "extensions": {
-      "type": "object"
+      "type": "object",
+      "patternProperties": {
+        "^": {}
+      },
+      "additionalProperties": false
     },
     "http_action_api": {
       "type": "string"
@@ -130,6 +150,14 @@
     },
     "status": {
       "type": "string"
+    },
+    "protocol": {
+      "type": "string",
+      "description": "Protocol declaration, conventionally AAA/0.1 or AAA/0.2. Informational; legacy protocol strings remain valid."
+    },
+    "last_updated": {
+      "type": "string",
+      "description": "Publisher-provided update marker; dates are recommended but not required."
     }
   },
   "required": [
