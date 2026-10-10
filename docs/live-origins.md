@@ -4,7 +4,7 @@ Checked on **2026-10-10 (UTC)**. One external origin is observed serving a hands
 
 | Origin | Declared protocol / card version | Validator result | Checked date | Notes |
 | --- | --- | --- | --- | --- |
-| [Auny](https://aunysillyme.com) → [canonical www origin](https://www.aunysillyme.com) | `AAA/0.1` / `0.1.0` | Frozen 0.1: AI instructions invalid (5 extras), card invalid (2 extras). Current 0.2: AI instructions invalid (2 extras), card invalid (2 extras). Every strict invocation exits 1. | 2026-10-10 | Both JSON files return 200 with `application/json`; declared `/llms.txt` returns 200 with `text/plain; charset=utf-8`. AI `last_updated` is `2026-10-09`; the card omits it. |
+| [Auny](https://aunysillyme.com) → [canonical www origin](https://www.aunysillyme.com) | `AAA/0.1` / `0.1.0` | Frozen 0.1: AI instructions invalid (5 extras), card invalid (2 extras). Current 0.2: AI instructions invalid (2 extras), card invalid (2 extras). Every strict invocation exits 1. | 2026-10-10 | Both JSON files return 200 with `application/json`; declared `/llms.txt` returns 200 with `text/plain; charset=utf-8`. AI `last_updated` is `2026-10-09`; the card omits it. Hosted lenient reader: `settings_profile`, exit 0. |
 
 Sierra reported Auny as the first external implementer. That chronology is user-supplied and has not been independently established. This registry records the observed deployment and its differences; it does not modify the publisher's site.
 
@@ -14,7 +14,7 @@ The apex origin returned a 301 redirect to `www` for both JSON files. Successful
 
 - `https://www.aunysillyme.com/.well-known/ai-instructions.json` — 200, `application/json`, 2,153 bytes
 - `https://www.aunysillyme.com/.well-known/agents.json` — 200, `application/json`, 707 bytes
-- `https://www.aunysillyme.com/llms.txt` — 200, `text/plain; charset=utf-8`
+- `https://www.aunysillyme.com/llms.txt` — 200, `text/plain; charset=utf-8`, 13,292 bytes
 
 `discovery.context` correctly points to `/llms.txt`. `/.well-known/llms.txt` returned 404; the declared root path is the one to read. `discovery.markdown_twin` is a human-readable rule, not a fetch URL. The reader does not automatically fetch `full_text` or Markdown twins.
 
@@ -66,7 +66,18 @@ node reference/read.mjs https://aunysillyme.com --json
 
 Local result: exit **1**, `outcome: "missing"`, `map: null`, warning `DNS lookup failed: EAI_AGAIN.` Native DNS in the audit environment was unavailable. The separate audit fetches above used its approved HTTPS proxy; they do not prove that the DNS-pinned reader completed a live network run. No proxy fallback or looser fetch policy was added to the reader.
 
-The Node 20 hosted workflow runs the same exact invocation in a separate, bounded `live-smoke` job. Its result must be inspected separately from deterministic fixture validation; external availability cannot be inferred from an overall green workflow when that job is allowed to fail. The PR receipt records the exact-head hosted result.
+The same invocation **succeeded on hosted Node v20.20.2 at 20:48:53 UTC**, at commit `69b479f8c665089f6a8703f727aaa3da2f2915e8`: exit **0**, `outcome: "settings_profile"`, canonical origin `https://www.aunysillyme.com`, `action_root: "none"`, and `grants_authority: false`. The [live-smoke job](https://github.com/sierracatalina/agent-aware-starter/actions/runs/38085198566/job/114310156395) completed successfully. Its four exact warnings were:
+
+```text
+$.actions: unknown field ignored.
+$.safety.untrusted_regions: unknown field ignored.
+$.agent_card.description: unknown field ignored.
+$.agent_card.endpoints.context: unknown field ignored.
+```
+
+The fetched sequence was apex `/.well-known/ai-instructions.json`, canonical www `/.well-known/ai-instructions.json`, canonical `/.well-known/agents.json`, then canonical `/llms.txt`. Experimental actions were ignored, not migrated or executed. This successful lenient read does not erase the strict authoring or timestamp issues above.
+
+The bounded `live-smoke` job is separate from deterministic fixture validation. Its result must be inspected separately; external availability cannot be inferred from an overall green workflow when that job is allowed to fail. The PR receipt records the final exact-head hosted result.
 
 ## Reproduce the strict audit
 
