@@ -49,7 +49,7 @@ Examples in this repository set `"live": false`. They are fixtures, not a publis
 ## Status and checks
 
 - Protocol target: `AAA/0.2`; two current schemas with identity `0.2.0`, plus two byte-frozen 0.1 schemas
-- Reference suite: 165 tests; six JSON fixtures, all `live: false`
+- Reference suite: 175 tests; six JSON fixtures, all `live: false`
 - Node 20 or later; no dependencies or package installation
 
 ```sh
@@ -59,6 +59,16 @@ node reference/validate.mjs examples/well-known/ai-instructions.json
 ```
 
 CI runs the tests and validates every JSON file under `examples/` on pushes and pull requests. Any nonzero result fails the check. The [validator](reference/validate.mjs) exits 0 for valid, 1 for invalid, and 2 for usage or I/O errors.
+
+## Fixture scaffold
+
+```sh
+node reference/init.mjs --profile site --out ./my-well-known
+node reference/init.mjs --profile settings --out ./settings-surface --name "My Settings"
+node reference/init.mjs --profile handoff --out ./handoff --name "My Catalog"
+```
+
+The [scaffold](reference/init.mjs) writes `agents.json`, `ai-instructions.json`, and `llms.txt` as `live: false` AAA/0.2 starters for the site, Settings, or hand-off profile. Existing files are left untouched unless `--force` is passed. Generated JSON is checked with the same validator engine before it is written. The library exports `scaffoldProfile(profile, options)`.
 
 ## Reference reader
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Added `reference/init.mjs`, a dependency-free scaffold that writes a
+  `live: false` AAA/0.2 well-known trio (`agents.json`,
+  `ai-instructions.json`, `llms.txt`) for the site, Settings, or hand-off
+  profile. Existing files are left in place unless `--force` is passed.
+  Generated documents use the same validator engine as `validate.mjs`.
+
 ## AAA/0.2 — 2026-10-10
 
 - Corrected the task-4 test count to 20 and aligned discovery order across
