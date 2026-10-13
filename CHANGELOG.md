@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Added `reference/conform.mjs`, a dependency-free runner that checks a
+  served origin for strict schema validity, well-known content types, and
+  the spec 02 live-publication rules. `--serve <dir>` hosts a fixture
+  directory on loopback and runs the same checks.
+
 ## AAA/0.2 — 2026-10-10
 
 - Corrected the task-4 test count to 20 and aligned discovery order across

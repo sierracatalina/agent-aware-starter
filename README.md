@@ -49,7 +49,7 @@ Examples in this repository set `"live": false`. They are fixtures, not a publis
 ## Status and checks
 
 - Protocol target: `AAA/0.2`; two current schemas with identity `0.2.0`, plus two byte-frozen 0.1 schemas
-- Reference suite: 165 tests; six JSON fixtures, all `live: false`
+- Reference suite: 177 tests; six JSON fixtures, all `live: false`
 - Node 20 or later; no dependencies or package installation
 
 ```sh
@@ -73,6 +73,17 @@ The [reader](reference/read.mjs) follows `ai-instructions.json` → `agents.json
 Outcomes are `ok`, `missing`, `invalid`, `fetch_refused`, `unknown_action`, or `settings_profile`. Exit 0 means `ok` or `settings_profile`; exit 1 means no usable requested map; exit 2 means usage error. An unknown action is never guessed. `action_root: "none"` never becomes an invented HTTP API. Permissive flags are advisory, and restrictive lists only tighten the consumer's existing policy.
 
 `--allow-http-local` is only for an explicitly selected loopback HTTP test fixture, such as `node reference/read.mjs http://127.0.0.1:8080 --allow-http-local`. It does not permit loopback/private redirect targets or weaken production HTTPS checks. Keep it out of production invocations.
+
+## Publication conformance
+
+```sh
+node reference/conform.mjs --serve examples/well-known
+node reference/conform.mjs --serve examples/product-examples/settings-desktop --json
+node reference/conform.mjs https://example.com
+node reference/conform.mjs http://127.0.0.1:8080 --allow-http-local
+```
+
+The [conformance runner](reference/conform.mjs) fetches the handshake and checks the authoring schemas plus the live-publication rules in [spec 02](spec/02-well-known.md#what-live-means): `application/json` for both JSON files, `text/plain; charset=utf-8` for `llms.txt` when present, `last_updated` on both documents when `live: true`, and well-known paths for a live claim. `--serve <dir>` hosts a fixture directory (a flat trio or a `.well-known/` subdirectory) on loopback and runs the same checks. Exit 0 means every check passed; 1 means a check failed; 2 is usage or I/O. The library exports `conformOrigin(origin, options)` and `serveAndConform(dir)`.
 
 For new fields and experimental-name mappings, see [migration to 0.2](docs/migration-0.2.md).
 
